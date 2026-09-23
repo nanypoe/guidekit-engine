@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GuideKit | Builder</title>
+  <link rel="stylesheet" href="../src/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../"><span class="brand-mark">G</span><span>GuideKit <b>Builder</b></span></a>
+    <a class="toc-toggle" href="../">Ver catálogo</a>
+  </header>
+  <main class="viewer-shell">
+    <p class="eyebrow">AUTORÍA SIN CÓDIGO</p>
+    <h1>Construye tu guía</h1>
+    <p class="hero-copy">Importa un JSON, ajusta los campos principales y descarga un archivo listo para versionar.</p>
+    <section class="step-card">
+      <label for="json-file">Archivo JSON</label>
+      <input id="json-file" type="file" accept="application/json">
+      <p id="builder-status" class="section-intro">Aún no has cargado una guía.</p>
+    </section>
+    <section id="editor" class="builder-editor" hidden>
+      <div class="step-card">
+        <div class="section-heading"><div><p class="eyebrow">METADATOS</p><h2>Ficha de la guía</h2></div></div>
+        <div class="form-grid">
+          <label>ID<input data-field="id"></label><label>Título<input data-field="title"></label>
+          <label>Franquicia<input data-field="franchise"></label><label>Versión<input data-field="version"></label>
+          <label>Sistemas<input data-field="systems" placeholder="Nintendo DS, PC"></label>
+          <label>Géneros<input data-field="genres" placeholder="RPG, Dungeon crawler"></label>
+          <label class="full-width">Resumen<textarea data-field="summary" rows="3"></textarea></label>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="section-heading"><div><p class="eyebrow">CONTENIDO</p><h2>Secciones</h2></div><button id="add-section" class="toc-toggle" type="button">+ Sección</button></div>
+        <div id="sections-editor"></div>
+      </div>
+      <div class="step-card">
+        <div class="section-heading"><div><p class="eyebrow">DATOS REUTILIZABLES</p><h2>Colecciones</h2></div><button id="add-collection" class="toc-toggle" type="button">+ Colección</button></div>
+        <p class="section-intro">Una línea por entidad: <code>nombre | categoría | descripción</code>. Sirve para enemigos, objetos, pistas, cartas o cualquier contenido del juego.</p>
+        <div id="collections-editor"></div>
+      </div>
+      <div class="step-card">
+        <div class="section-heading"><div><p class="eyebrow">NAVEGACIÓN</p><h2>Índice rápido</h2></div></div>
+        <p class="section-intro">Una línea por acceso: <code>etiqueta | destino | tono</code>.</p>
+        <textarea id="quick-index-editor" rows="4" placeholder="Inicio | primeros-pasos | cyan"></textarea>
+      </div>
+      <section id="validation-panel" class="validation-panel" aria-live="polite"></section>
+      <div class="builder-actions"><button id="download" class="toc-toggle" type="button" disabled>Descargar JSON</button></div>
+    </section>
+  </main>
+  <script type="module" src="builder.js"></script>
+</body>
+</html>

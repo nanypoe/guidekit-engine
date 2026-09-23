@@ -1,0 +1,11 @@
+[
+  {
+    "id": "smt-strange-journey",
+    "title": "Shin Megami Tensei: Strange Journey",
+    "systems": ["Nintendo DS"],
+    "genres": ["RPG", "Dungeon crawler"],
+    "cover": "",
+    "status": "piloto",
+    "description": "Guía piloto para validar mapas, rutas y seguimiento de progreso."
+  }
+]

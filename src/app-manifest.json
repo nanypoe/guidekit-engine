@@ -1,0 +1,16 @@
+{
+  "surfaces": {
+    "viewer": {
+      "entry": "viewer.html",
+      "audience": "reader",
+      "purpose": ["read", "navigate", "track-progress"]
+    },
+    "builder": {
+      "entry": "builder/index.html",
+      "audience": "creator",
+      "purpose": ["author", "edit", "validate", "export"]
+    }
+  },
+  "shared": ["src/components", "src/modules", "src/validation.js", "schema/guide.schema.json"],
+  "rule": "Viewer and builder may share data contracts and components, but never assume the same interaction flow."
+}

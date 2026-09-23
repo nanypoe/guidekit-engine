@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#10131f">
+    <title>GuideKit Engine | Guías interactivas</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="src/styles.css">
+  </head>
+  <body data-page="hub">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="GuideKit Engine, inicio">
+        <span class="brand-mark">G</span><span>GuideKit <b>Engine</b></span>
+      </a>
+      <div class="header-actions"><a class="toc-toggle" href="builder/">Crear guía</a><button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema">◐</button></div>
+    </header>
+    <main class="hub-shell">
+      <section class="hero-panel">
+        <p class="eyebrow">GUÍAS PARA JUGAR, NO PARA PERDERSE</p>
+        <h1>Tu mapa. Tu ruta.<br><span>Tu partida.</span></h1>
+        <p class="hero-copy">Navega por guías táctiles, sin anuncios y con tu progreso siempre a mano.</p>
+        <label class="search-field">
+          <span aria-hidden="true">⌕</span>
+          <input id="guide-search" type="search" placeholder="Buscar juego, consola o género…" autocomplete="off">
+        </label>
+      </section>
+      <section class="catalog-section" aria-labelledby="catalog-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">CATÁLOGO</p><h2 id="catalog-title">Guías disponibles</h2></div>
+          <div class="view-switcher" role="group" aria-label="Vista del catálogo">
+            <button class="active" data-view="grid" type="button">Cuadrícula</button>
+            <button data-view="list" type="button">Lista</button>
+          </div>
+        </div>
+        <div id="guide-catalog" class="guide-catalog" aria-live="polite"></div>
+      </section>
+    </main>
+    <footer class="site-footer">GuideKit Engine · estándar abierto para guías interactivas</footer>
+    <script type="module" src="src/hub.js"></script>
+  </body>
+</html>

@@ -1,0 +1,127 @@
+Tengo en mente desarrollar un proyecto de código abierto llamado GuideKit Engine, pensado para resolver un problema de ergonomía y experiencia de usuario que las webs tradicionales de guías (como EliteGuías, Vandal, GameFAQs o IGN) no atienden: la navegación interactiva y táctil durante el juego activo, especialmente optimizada para consolas con pantalla secundaria (como la AYN Thor), dispositivos móviles en posición horizontal/vertical o configuraciones de doble monitor y por supuesto para dispositivos convencionales como lo son una monopantalla de PC y/o móvil.
+
+A continuación, detallo toda la visión, arquitectura, decisiones técnicas, referencias visuales y el plan maestro estructurado que he concebido para este kit.
+1. Motivación y Concepto Principal
+
+    El problema de las guías actuales: Las páginas tradicionales sufren de muros de texto estáticos, capturas fijas de baja calidad, sobrecarga de anuncios, barras de navegación gigantes que roban espacio en pantallas pequeñas y falta de interactividad en tiempo real.
+
+    La solución: Una doble aplicación que por una parte funcione como un framework ligero (SDK/Engine) que para diseñar, crear y editar guías para videojuegos. Mientras que lo segundo sea su uso en una pantalla principal o consola en la que se juega, y en la pantalla secundaria (o dispositivo móvil) la web actúa como un radar/panel auxiliar interactivo, sin distracciones y optimizado para todo tipo de pantallas: pantalla secundaria de la AYN Thor, Móvil, Tablets, PC, etc.
+
+    Casos de uso clave: Entrarían todos los géneros de videojuegos o videojuegos que necesariamente deben de tener una guía. Entre los ejemplos podemos tener juegos con mapas complejos o mazmorras difíciles como Shin Megami Tensei: Strange Journey (DS/3DS), Phantasy Star 1 (Master System), Elden Ring, Metroidvanias, Aventuras Gráficas o Novelas Visuales, tomas de decisiones, ramificaciones, caminos, objetos ocultos, etc.
+
+2. Referencias de Interfaz (UX / UI Inspiración)
+
+Para la navegación me he basado en lo mejor de las páginas que suelo consultar:
+
+    Primer índice superior: bloques de texto visuales organizados en cuadrículas responsivas, el texto ideal para pulsar con los pulgares en una pantalla portatil como la de la AYN Thor, en un teléfono/tablet o usarlo fácilmente en un monitor de PC
+
+    Índice como widget flotante y árbol de contenidos (Inspirado en EliteGuías): Un índice jerárquico completo que aparezca al presionar el botón de un widget flotante (desplegable o en arborescencia) para saltar rápidamente a cualquier capítulo, zona, misión o subsección.
+
+    Landing Page / Portal Hub: Al entrar a la web principal en la AYN Thor, debe mostrarse un catálogo táctil con buscador en tiempo real, filtros por consola (NES, Master System, SNES, PS1, NDS, 3DS, PC, etc.), por género y secciones de guías "Recientes" o "Más Vistas".
+
+3. Arquitectura Técnica y Estrategia Jamstack (GitHub Pages)
+
+Quiero que el proyecto sea 100% gratuito de mantener, rápido y colaborativo, sin depender de servidores o bases de datos complejas.
+
+    Hosting y Modelo de Datos (Data-Driven Jamstack):
+
+        Sin base de datos SQL ni servidores PHP/Node backend. Todo corre sobre GitHub Pages.
+
+        Estructura Híbrida de Archivos: Toda una guía se define en un único archivo .json alojado en la carpeta /guides/ (ejemplo: smt-strange-journey.json o elden-ring.json). Se debe de crear un schema para el .json que pueda ayudar a mejorar toda la navegación y la manera en que se verá la página o la guía.
+
+        Gestión de Imágenes Híbrida: Admite tanto rutas locales dentro del repositorio (/assets/images/[game-id]/...) como enlaces externos CDN (Imgur, web oficial, etc.).
+
+        Modelo de Colaboración: Para añadir o corregir una guía, la comunidad solo hace un Fork, agrega su .json y envía un Pull Request (PR).
+
+    Stack Tecnológico:
+
+        CSS: Tailwind CSS (para diseño basado en utilidades y temas gamer retropixel neón, que recuerde a juegos como Streets of Rage, pero que tenga identidad de marca única) combinado con estilos CSS custom para adaptar la maquetación a resoluciones cortas (4:3, 3:2). Modo Dark and Light teniendo en cuenta los distintos tipos de pantalla.
+
+        JS: Vanilla JavaScript ES6+ modular (o Alpine.js si se requiere reactividad ligera). Cero dependencias de compilación pesadas, tiempo de carga de 0 ms y mínimo consumo de memoria RAM.
+
+        Offline-First (PWA): Incluirá manifest.json y service-worker.js para que los jugadores puedan instalar la web en sus consolas Android/Linux y consultar todas las guías sin conexión a internet.
+
+4. Motores de Mapas y Herramientas por Género (Universalidad)
+
+El kit no debe ser solo para RPGs de mazmorras; debe soportar todos los géneros de videojuegos:
+
+    Grid Map 2D (Dungeon Crawlers): Renderizador en Canvas/SVG para matrices paso a paso (SMT: Strange Journey, Phantasy Star 1). Soporta capas/pisos (B1F, B2F), azulejos especiales (puertas unidireccionales, trampas de foso, zonas oscuras, dañinas, cofres, objetos, eventos, etc -todo tipo de señalética) y notas vinculadas a coordenadas [x, y].
+
+    Pin Map / Image Overlay (Mundo Abierto, Metroidvania, Sandbox): Mapa sobre imagen base (Elden Ring, Super Metroid, GTA, Metroid Prime) con marcadores interactivos XY filtrables por categorías (Jefes, Cofres, Coleccionables, Misiones). El tamaño de dichos marcadores debe de ser modificable de una forma intuitiva con el mouse, sin depender de códigos o pruebas no intuitivas. Se desarrolla esta y otras funcionalidades de una forma que cualquiera que no sea programador pueda usarla.
+
+    Decision Tree / Flowchart (Novelas Visuales y Aventuras Gráficas): Diagramas de nodos para rutas condicionales, decisiones y prerrequisitos (Grim Fandango, Ace Attorney).
+
+    Timeline / Sequential Steps (Acción, Fighting, Shooters): Líneas de tiempo paso a paso para combos, rutas de speedrun o misiones secundarias lineales.
+
+    Widgets e Interactividad In-Situ:
+
+        Buscador flotante de debilidades de enemigos/demonios de la zona actual, como una especie de bestiario que pueda ayudar a derrotar a un jefe o enemigo de cualquier juego dando la información más relevante de su estrategia.
+
+        Checkpoint & Tracker System: Progreso guardado automáticamente en localStorage (para marcar cofres abiertos, jefes derrotados o pasos completados).
+
+5. Creador Visual de Guías (Visual JSON Builder)
+
+Para facilitar la aportación de usuarios que no saben programar ni estructurar JSON manualmente:
+
+    El repositorio incluirá una herramienta web gráfica interna (/builder/). Que utilizará todos los módulos de creación de guías, el builder debe de ser lo más intuitivo posible, imagínate que la persona solo debe usar mouse en su mayoría y escribir lo necesario.
+
+    Permitirá a los creadores rellenar formularios, pintar cuadrículas haciendo clic en casillas, colocar puntos sobre un mapa subido, cambiar de tamaño los puntos nuevos agregados para que se adapte a las imágenes, poner líneas, flechas y cualquier tipo de señalética y exportar el archivo .json de la guía listo para subir mediante GitHub Desktop o Pull Request.
+
+6. Master Plan Estructurado (Fases → Tareas → Subtareas)
+FASE 1: ESPECIFICACIÓN DEL ESTÁNDAR DE DATOS (JSON SCHEMA)
+
+    Tarea 1.1: Esquema de Metadatos y Clasificación: id, title, franchise, systems: [], genres: [], tags: [], author, version. Debes de investigar si podría requerir más cosas porque hay que tener en cuenta todos los géneros disponibles capaces de necesitar una guía.
+
+    Tarea 1.2: Esquema para Menús e Índices Adaptativos: quick_index (bloques estilo Vandal), table_of_contents (árbol estilo EliteGuías) y enlaces cruzados. Debes de investigar si podría requerir más cosas porque hay que tener en cuenta todos los géneros disponibles capaces de necesitar una guía.
+
+    Tarea 1.3: Esquema Modular de Herramientas Visuales (modules): grid_map, pin_map, decision_tree, interactive_tool y timeline_route. Debes de investigar si podría requerir más cosas porque hay que tener en cuenta todos los géneros disponibles capaces de necesitar una guía.
+
+    Tarea 1.4: Esquema de Contenido e Imágenes Híbridas: Pasos formateados con Markdown ligero, avisos destacables (warning, boss) y gestor de rutas locales/externas de imágenes. Debes de investigar si podría requerir más cosas porque hay que tener en cuenta todos los géneros disponibles capaces de necesitar una guía.
+
+FASE 2: ARQUITECTURA DEL REPOSITORIO Y FRONTEND BASE
+
+    Tarea 2.1: Estructura del Repositorio: Directorios /src/, /guides/, /assets/images/ y /builder/. O preparar una estructura lo más escalable posible.
+
+    Tarea 2.2: Sistema de Estilos y Tema Gamer: Tailwind CSS con estética retropixel neón o cyberpunk, que recuerde a juegos como Streets of Rage. Debe de ser original, seguir un estilo de identidad única, por lo que antes de empezar a crear todo, debemos de redactar un briefing creativo para la marca y a partir de ahí crear lo demás: logo, tipografía, paleta de colores y comunicación verbal. La App podría usarse en cualquier dispositivo, en teléfonos y la pantalla inferior de la AYN Thor para ver la guía o para diseñar (debe ser responsive), lo mismo en la PC (pero con la PC es más fácil diseñar, crear y editar guías, así que en la PC debe de ser todavía más intuitivo esto)
+
+    Tarea 2.3: Shell del Visor de Guías (viewer.html): Maquetación responsiva según el anális de todos estos requerimientos.
+
+FASE 3: DESARROLLO DEL CORE ENGINE (JavaScript)
+
+    Tarea 3.1: Módulo de Índices Dinámicos (ui-index.js): Renderizador de bloques táctiles y widget tipo árbol flotando que aparezca y desaparezca cuando se le toque o requiera.
+
+    Tarea 3.2: Motor de Mapas 2D Multitipo (map-engine.js): Renderizado de cuadrículas (Grid) y mapas sobre imágenes (Pin Map) con selección por pisos y desplazamiento sincrónico mapa-texto. Debe de ser intuitivo para personas que solo puedan usar mouse y teclado y nada más sepan ofimática. Hasta un niño de 5 años podría usarlo.
+
+    Tarea 3.3: Motor de Diagramas de Flujo (node-engine.js): Arboles de decisión para novelas visuales y cualquier otro requerimiento necesario en géneros derivados.
+
+    Tarea 3.4: Herramientas e Interactividad (tools-engine.js): Buscador de debilidades, estadísticas, herramienta tipo bestiario, etc y guardado en localStorage (Checkpoints).
+
+    Tarea 3.5: Visor de Imágenes y Pasos (step-renderer.js): Parser de Markdown a HTML y galería táctil emergente. Cada paso de la guía o cada parte que sea armable en la propia aplicación debe de tener una opción de subir de una a más imágenes según se requiera, antes o después de algún texto dentro del paso. Así permitirá que pueda aparecer una imagen al inicio, otras en medio y una al final, como lo requiera la persona que lo armará.
+
+FASE 4: PORTAL HUB Y EXPERIENCIA OFFLINE (PWA)
+
+    Tarea 4.1: Escáner de Guías (hub.js): Indexación automática y renderizado de la portada del juego (debe de haber algo para poder subir una imagen que sirva como portada a las card o las listas o cards con más ancho y poco de alto, tipo listas o etc, debe de haber una forma para ver cuadrícula o lista y filtros como se muestran las cards. Un máximo de presentación por landing page y botón inferior de siguiente. Filtrarlas por guía más reciente, pero tener otras categorías: año, consola, nombre, etc).
+
+    Tarea 4.2: Filtros y Buscador Global: Búsqueda en tiempo real por título, consola y género, etc.
+
+    Tarea 4.3: Capacidades PWA: Archivos manifest.json y service-worker.js para funcionamiento 100% offline.
+
+FASE 5: HERRAMIENTA CREADORA (VISUAL JSON BUILDER)
+
+    Tarea 5.1: Formulario de Datos Generales: Interfaz para metadatos e índices que podría ser un formulario o cualquier otra herramienta que permita la adecuada creación de las guías, pasos, etc
+
+    Tarea 5.2: Editor Gráfico de Mapas: Pintor visual de cuadrículas y colocador de marcadores XY sobre mapas. Hay que analizar qué más podrían necesitar estas herramientas para mejorarlas
+
+    Tarea 5.3: Generador y Exportador: Validador de formato y botón de descarga del .json.
+
+FASE 6: CASOS PILOTO DE PRUEBA (PROVING GROUNDS)
+
+    Tarea 6.1 Empezaremos con Shin Megami Tensei: Strange Journey como juego de prueba.
+
+OBLIGATORIO:
+- Proyecto altamente escalable, debemos dejar todo de modo que se escale, así si se quiere agregar un nuevo módulo haya una carpeta o subcarpetas para posteriores proyectos, un archivo que indexe todo y que funcione como un cerebro.
+- La app y las guías deben de ser en español.
+- Si un juego está en inglés al momento de crear los archivos de ejemplo basado en el esquema central para guías que analizará los .json, se dejarán los términos claves en inglés, pero el resto de la guía seguirá siendo en español.
+- Debe de haber una manera en que las palabras claves se resalten de modo que la guía sea intuitiva a la vista y lectura, para que ayude al lector a seguirla.
+- Hay un archivo que se llama SMT-SJ-Guia.txt, del cual partiremos para analizarlo completamente y estructura la forma en que sería una guía convencional o los elementos que podrían o no tener según el tipo de guía. Y haremos la guía de SMT Strange Journey.
+- Recuerda sobre todo, que es para todos los géneros, cualquier mejora futura que no se haya integrado, es en respuesta a eso. A que admitirá cualquier tipo de género.

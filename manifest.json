@@ -1,0 +1,11 @@
+{
+  "name": "GuideKit Engine",
+  "short_name": "GuideKit",
+  "description": "Guías interactivas y offline para videojuegos.",
+  "lang": "es",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#10131f",
+  "theme_color": "#10131f",
+  "icons": []
+}

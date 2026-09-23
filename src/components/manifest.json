@@ -1,0 +1,7 @@
+{
+  "progress_tracker": { "label": "Seguimiento de progreso", "scope": "step" },
+  "keyword_highlighter": { "label": "Resaltado de términos", "scope": "content" },
+  "image_gallery": { "label": "Galería de imágenes", "scope": "step" },
+  "data_collection": { "label": "Colección de datos", "scope": "guide", "surfaces": ["viewer", "builder"] },
+  "collection_filter": { "label": "Filtro de colecciones", "scope": "collection", "surfaces": ["viewer", "builder"] }
+}

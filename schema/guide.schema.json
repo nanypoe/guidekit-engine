@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://guidekit.engine/schema/guide.schema.json",
+  "title": "GuideKit Guide",
+  "type": "object",
+  "required": ["id", "title", "systems", "genres", "language", "version", "sections"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "title": { "type": "string", "minLength": 1 },
+    "franchise": { "type": "string" },
+    "systems": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "genres": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "language": { "const": "es" },
+    "author": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" }, "url": { "type": "string" } }, "additionalProperties": false },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "status": { "enum": ["piloto", "borrador", "publicada"] },
+    "summary": { "type": "string" },
+    "keywords": { "type": "array", "items": { "type": "string" } },
+    "quickIndex": { "type": "array", "items": { "$ref": "#/$defs/quickIndexItem" } },
+    "tableOfContents": { "type": "array", "items": { "$ref": "#/$defs/tocItem" } },
+    "datasets": { "$ref": "#/$defs/datasets" },
+    "sections": { "type": "array", "items": { "$ref": "#/$defs/section" }, "minItems": 1 }
+  },
+  "$defs": {
+    "quickIndexItem": { "type": "object", "required": ["id", "label", "target"], "properties": { "id": { "type": "string" }, "label": { "type": "string" }, "target": { "type": "string" }, "tone": { "type": "string" } }, "additionalProperties": false },
+    "tocItem": { "type": "object", "required": ["id", "title"], "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "children": { "type": "array", "items": { "$ref": "#/$defs/tocItem" } } }, "additionalProperties": false },
+    "section": { "type": "object", "required": ["id", "title"], "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "intro": { "type": "string" }, "steps": { "type": "array", "items": { "$ref": "#/$defs/step" } }, "modules": { "type": "array", "items": { "$ref": "#/$defs/module" } } }, "additionalProperties": false },
+    "step": { "type": "object", "required": ["id", "title", "body"], "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "body": { "type": "string" }, "checkable": { "type": "boolean" }, "images": { "type": "array", "items": { "$ref": "#/$defs/image" } }, "callout": { "type": "object", "required": ["type", "label", "text"], "properties": { "type": { "enum": ["tip", "warning", "boss"] }, "label": { "type": "string" }, "text": { "type": "string" } }, "additionalProperties": false } }, "additionalProperties": false },
+    "image": { "type": "object", "required": ["src", "alt"], "properties": { "src": { "type": "string", "minLength": 1 }, "alt": { "type": "string", "minLength": 1 }, "caption": { "type": "string" }, "position": { "enum": ["before", "after"] } }, "additionalProperties": false },
+    "module": { "type": "object", "required": ["type", "id", "title"], "properties": { "type": { "enum": ["grid_map", "pin_map", "decision_tree", "interactive_tool", "timeline_route"] }, "id": { "type": "string" }, "title": { "type": "string" }, "width": { "type": "integer", "minimum": 1 }, "height": { "type": "integer", "minimum": 1 }, "legend": { "type": "array" }, "markers": { "type": "array" }, "image": { "type": "string" }, "alt": { "type": "string" }, "pins": { "type": "array" }, "nodes": { "type": "array" }, "steps": { "type": "array" }, "description": { "type": "string" } }, "additionalProperties": true },
+    "datasets": { "type": "object", "properties": { "collections": { "type": "array", "items": { "$ref": "#/$defs/collection" } }, "enemies": { "type": "array", "items": { "$ref": "#/$defs/entity" } }, "bosses": { "type": "array", "items": { "$ref": "#/$defs/entity" } }, "items": { "type": "array", "items": { "$ref": "#/$defs/entity" } }, "tables": { "type": "array", "items": { "$ref": "#/$defs/table" } } }, "additionalProperties": false },
+    "collection": { "type": "object", "required": ["id", "title"], "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "columns": { "type": "array", "items": { "type": "string" } }, "items": { "type": "array", "items": { "type": "object" } }, "rows": { "type": "array", "items": { "type": "array" } } }, "additionalProperties": false },
+    "entity": { "type": "object", "required": ["id", "name"], "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "category": { "type": "string" }, "description": { "type": "string" }, "attributes": { "type": "object" }, "tags": { "type": "array", "items": { "type": "string" } } }, "additionalProperties": true },
+    "table": { "type": "object", "required": ["id", "title", "columns", "rows"], "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "columns": { "type": "array", "items": { "type": "string" } }, "rows": { "type": "array", "items": { "type": "array" } } }, "additionalProperties": false }
+  }
+}

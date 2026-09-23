@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#10131f">
+    <title>GuideKit Engine | Visor</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="src/styles.css">
+  </head>
+  <body data-page="viewer">
+    <header class="site-header viewer-header">
+      <a class="brand" href="./" aria-label="Volver al catálogo"><span class="brand-mark">G</span><span>GuideKit <b>Engine</b></span></a>
+      <div class="header-actions"><a class="toc-toggle" href="builder/">Editor</a><button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema">◐</button><button class="toc-toggle" data-toc-toggle type="button">Índice</button></div>
+    </header>
+    <main id="viewer-app" class="viewer-shell" aria-live="polite">
+      <div class="loading-state">Cargando guía…</div>
+    </main>
+    <div class="toc-backdrop" data-toc-close hidden></div>
+    <aside class="toc-drawer" data-toc-drawer aria-label="Tabla de contenidos"></aside>
+    <button class="floating-index" data-toc-toggle type="button" aria-label="Abrir índice">☰</button>
+    <script type="module" src="src/viewer.js"></script>
+  </body>
+</html>

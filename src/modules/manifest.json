@@ -1,0 +1,7 @@
+{
+  "grid_map": { "label": "Mapa de cuadrícula", "genres": ["RPG", "Dungeon crawler", "Metroidvania"] },
+  "pin_map": { "label": "Mapa con marcadores", "genres": ["Mundo abierto", "Sandbox", "Metroidvania"] },
+  "decision_tree": { "label": "Árbol de decisiones", "genres": ["Novela visual", "Aventura gráfica"] },
+  "interactive_tool": { "label": "Herramienta interactiva", "genres": ["Todos"] },
+  "timeline_route": { "label": "Ruta secuencial", "genres": ["Acción", "Fighting", "Shooter", "Speedrun"] }
+}

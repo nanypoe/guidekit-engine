@@ -1,0 +1,52 @@
+{
+  "$schema": "../schema/guide.schema.json",
+  "id": "smt-strange-journey",
+  "title": "Shin Megami Tensei: Strange Journey",
+  "franchise": "Shin Megami Tensei",
+  "systems": ["Nintendo DS"],
+  "genres": ["RPG", "Dungeon crawler"],
+  "tags": ["mazmorras", "demonios", "exploración"],
+  "language": "es",
+  "author": { "name": "GuideKit community", "url": "" },
+  "version": "0.1.0",
+  "status": "piloto",
+  "summary": "Estructura inicial para convertir una guía convencional en una experiencia navegable y táctil.",
+  "quickIndex": [
+    { "id": "inicio", "label": "Primeros pasos", "target": "primeros-pasos", "tone": "cyan" },
+    { "id": "exploracion", "label": "Exploración", "target": "exploracion", "tone": "violet" },
+    { "id": "combate", "label": "Combate", "target": "combate", "tone": "orange" }
+  ],
+  "tableOfContents": [
+    { "id": "primeros-pasos", "title": "Primeros pasos" },
+    { "id": "exploracion", "title": "Exploración", "children": [{ "id": "mapa-sector-1", "title": "Mapa: Sector 1" }] },
+    { "id": "combate", "title": "Combate", "children": [{ "id": "debilidades", "title": "Debilidades y términos clave" }] }
+  ],
+  "keywords": ["Main Mission", "Demon Source", "Forma", "save point"],
+  "sections": [
+    {
+      "id": "primeros-pasos",
+      "title": "Primeros pasos",
+      "intro": "Esta guía combina instrucciones breves con módulos que pueden crecer junto al proyecto.",
+      "steps": [
+        { "id": "welcome", "title": "Prepara tu expedición", "body": "Activa el **save point** cuando lo encuentres y consulta el índice rápido para volver a la ruta sin perder tiempo.", "checkable": true },
+        { "id": "main-mission", "title": "Sigue la Main Mission", "body": "Las misiones principales se muestran como una secuencia de pasos. Los términos del juego aparecen resaltados para distinguirlos del texto explicativo.", "callout": { "type": "tip", "label": "Consejo", "text": "Marca cada paso al terminarlo; el progreso se guarda en este dispositivo." }, "checkable": true }
+      ]
+    },
+    {
+      "id": "exploracion",
+      "title": "Exploración",
+      "intro": "Los módulos de mapa se incorporan como datos, no como lógica específica del juego.",
+      "modules": [
+        { "type": "grid_map", "id": "mapa-sector-1", "title": "Mapa: Sector 1", "width": 8, "height": 5, "legend": [{ "key": "start", "label": "Inicio" }, { "key": "exit", "label": "Salida" }], "markers": [{ "x": 1, "y": 1, "kind": "start", "label": "Inicio" }, { "x": 6, "y": 3, "kind": "exit", "label": "Salida" }] }
+      ]
+    },
+    {
+      "id": "combate",
+      "title": "Combate",
+      "intro": "Las tablas y herramientas interactivas podrán vivir junto a los pasos de una sección.",
+      "steps": [
+        { "id": "debilidades", "title": "Debilidades y términos clave", "body": "Consulta la afinidad de cada **Demon Source** antes de gastar recursos. La palabra **Forma** conserva su terminología original del juego.", "callout": { "type": "warning", "label": "Atención", "text": "No avances a una zona nueva sin revisar tu equipo y guardar." }, "checkable": true }
+      ]
+    }
+  ]
+}
