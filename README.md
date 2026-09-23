@@ -90,3 +90,7 @@ El editor de `grid_map` permite crear mapas por cuadrícula desde el navegador.
 El clic sobre una celda alterna entre vacío, inicio, salida y punto de interés;
 las dimensiones y los marcadores se exportan como datos independientes del juego.
 La validación también impide exportar marcadores fuera de los límites declarados.
+
+El editor de `pin_map` permite definir una imagen base y marcadores mediante
+coordenadas porcentuales (`0-100`). Esto mantiene el módulo reutilizable para
+cualquier género y evita acoplarlo a un juego concreto.

@@ -39,13 +39,15 @@ function renderEditor() {
     <article class="builder-section" data-section="${index}">
       <div class="form-grid"><label>ID<input data-section-field="id" value="${escapeHtml(section.id || "")}"></label><label>Título<input data-section-field="title" value="${escapeHtml(section.title || "")}"></label><label class="full-width">Introducción<textarea data-section-field="intro" rows="2">${escapeHtml(section.intro || "")}</textarea></label></div>
       <label>Pasos (uno por línea; formato: título | contenido)<textarea data-section-field="steps" rows="4">${escapeHtml((section.steps || []).map((step) => `${step.title} | ${step.body}`).join("\n"))}</textarea></label>
-      <div class="module-editor"><div class="section-heading"><h3>Mapas de cuadrícula</h3><button data-add-grid="${index}" class="toc-toggle" type="button">+ Mapa</button></div><div data-modules="${index}">${renderGridEditors(section, index)}</div></div>
+      <div class="module-editor"><div class="section-heading"><h3>Mapas visuales</h3><div class="header-actions"><button data-add-grid="${index}" class="toc-toggle" type="button">+ Cuadrícula</button><button data-add-pin="${index}" class="toc-toggle" type="button">+ Pin map</button></div></div><div data-modules="${index}">${renderGridEditors(section, index)}${renderPinEditors(section, index)}</div></div>
     </article>`).join("");
   sectionsEditor.querySelectorAll("[data-section]").forEach((element, index) => {
     element.querySelectorAll("[data-section-field]").forEach((field) => field.addEventListener("input", () => updateSection(index, element)));
   });
   sectionsEditor.querySelectorAll("[data-add-grid]").forEach((button) => button.addEventListener("click", () => addGridModule(Number(button.dataset.addGrid))));
+  sectionsEditor.querySelectorAll("[data-add-pin]").forEach((button) => button.addEventListener("click", () => addPinModule(Number(button.dataset.addPin))));
   bindGridEditors();
+  bindPinEditors();
   editor.hidden = false;
   renderCollections();
   renderQuickIndex();
@@ -92,6 +94,38 @@ function addGridModule(sectionIndex) {
   const section = guide.sections[sectionIndex];
   section.modules ||= [];
   section.modules.push({ type: "grid_map", id: `${section.id}-mapa-${section.modules.length + 1}`, title: "Nuevo mapa", width: 6, height: 4, legend: [{ key: "start", label: "Inicio" }, { key: "exit", label: "Salida" }, { key: "poi", label: "Punto de interés" }], markers: [] });
+  renderEditor();
+  renderValidation();
+}
+
+function renderPinEditors(section, sectionIndex) {
+  return (section.modules || []).map((module, moduleIndex) => {
+    if (module.type !== "pin_map") return "";
+    const pins = module.pins || [];
+    return `<div class="grid-editor pin-editor"><div class="form-grid"><label>ID<input data-pin-field="id" data-pin="${sectionIndex}:${moduleIndex}" value="${escapeHtml(module.id || "")}"></label><label>Título<input data-pin-field="title" data-pin="${sectionIndex}:${moduleIndex}" value="${escapeHtml(module.title || "")}"></label><label class="full-width">Imagen base<input data-pin-field="image" data-pin="${sectionIndex}:${moduleIndex}" value="${escapeHtml(module.image || "")}" placeholder="assets/images/juego/mapa.webp"></label><label class="full-width">Texto alternativo<input data-pin-field="alt" data-pin="${sectionIndex}:${moduleIndex}" value="${escapeHtml(module.alt || "")}"></label></div><label>Marcadores (nombre | categoría | X% | Y%)<textarea data-pin-field="pins" data-pin="${sectionIndex}:${moduleIndex}" rows="4">${escapeHtml(pins.map((pin) => `${pin.label || ""} | ${pin.kind || "poi"} | ${pin.x} | ${pin.y}`).join("\n"))}</textarea></label></div>`;
+  }).join("");
+}
+
+function bindPinEditors() {
+  sectionsEditor.querySelectorAll("[data-pin-field]").forEach((field) => field.addEventListener("input", () => {
+    const [sectionIndex, moduleIndex] = field.dataset.pin.split(":").map(Number);
+    const module = guide.sections[sectionIndex].modules[moduleIndex];
+    const key = field.dataset.pinField;
+    if (key === "pins") {
+      module.pins = field.value.split("\n").filter(Boolean).map((line, index) => {
+        const [label, kind = "poi", x = "0", y = "0"] = line.split("|");
+        return { id: `${module.id}-pin-${index + 1}`, label: label.trim(), kind: kind.trim(), x: Number(x) || 0, y: Number(y) || 0 };
+      });
+    } else module[key] = key === "id" ? slug(field.value) : field.value;
+    status.textContent = "Cambios pendientes de exportar.";
+    renderValidation();
+  }));
+}
+
+function addPinModule(sectionIndex) {
+  const section = guide.sections[sectionIndex];
+  section.modules ||= [];
+  section.modules.push({ type: "pin_map", id: `${section.id}-pin-map-${section.modules.length + 1}`, title: "Nuevo pin map", image: "", alt: "", pins: [] });
   renderEditor();
   renderValidation();
 }

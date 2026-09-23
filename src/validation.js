@@ -40,19 +40,21 @@ export function validateGuide(guide) {
         }
       }
       if (module.type === "pin_map") {
+        if (!module.image?.trim()) warnings.push(`modules.${module.id}: pin_map no tiene imagen base.`);
+        if (!module.alt?.trim()) warnings.push(`modules.${module.id}: pin_map requiere texto alternativo.`);
         for (const pin of module.pins || []) {
           if (typeof pin.x !== "number" || typeof pin.y !== "number" || pin.x < 0 || pin.x > 100 || pin.y < 0 || pin.y > 100) {
             errors.push(`modules.${module.id}: pin fuera de rango 0-100.`);
           }
         }
-        for (const [collectionIndex, collection] of (guide.datasets?.collections || []).entries()) {
-          addId(collection.id, `datasets.collections[${collectionIndex}]`);
-          if (!collection.title?.trim()) errors.push(`datasets.collections[${collectionIndex}].title: es obligatorio.`);
-          for (const [itemIndex, item] of (collection.items || []).entries()) {
-            if (!item.name?.trim()) warnings.push(`datasets.collections[${collectionIndex}].items[${itemIndex}]: falta nombre.`);
-          }
-        }
       }
+    }
+  }
+  for (const [collectionIndex, collection] of (guide.datasets?.collections || []).entries()) {
+    addId(collection.id, `datasets.collections[${collectionIndex}]`);
+    if (!collection.title?.trim()) errors.push(`datasets.collections[${collectionIndex}].title: es obligatorio.`);
+    for (const [itemIndex, item] of (collection.items || []).entries()) {
+      if (!item.name?.trim()) warnings.push(`datasets.collections[${collectionIndex}].items[${itemIndex}]: falta nombre.`);
     }
   }
   for (const item of guide.quickIndex || []) if (!ids.has(item.target)) warnings.push(`quickIndex.${item.id}: referencia sin destino "${item.target}".`);
