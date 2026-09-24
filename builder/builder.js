@@ -39,7 +39,7 @@ function renderEditor() {
     <article class="builder-section" data-section="${index}">
       <div class="form-grid"><label>ID<input data-section-field="id" value="${escapeHtml(section.id || "")}"></label><label>Título<input data-section-field="title" value="${escapeHtml(section.title || "")}"></label><label class="full-width">Introducción<textarea data-section-field="intro" rows="2">${escapeHtml(section.intro || "")}</textarea></label></div>
       <label>Pasos (uno por línea; formato: título | contenido)<textarea data-section-field="steps" rows="4">${escapeHtml((section.steps || []).map((step) => `${step.title} | ${step.body}`).join("\n"))}</textarea></label>
-      <div class="module-editor"><div class="section-heading"><h3>Módulos visuales</h3><div class="header-actions"><button data-add-grid="${index}" class="toc-toggle" type="button">+ Cuadrícula</button><button data-add-pin="${index}" class="toc-toggle" type="button">+ Pin map</button><button data-add-decision="${index}" class="toc-toggle" type="button">+ Decision tree</button></div></div><div data-modules="${index}">${renderGridEditors(section, index)}${renderPinEditors(section, index)}${renderDecisionEditors(section, index)}</div></div>
+      <div class="module-editor"><div class="section-heading"><h3>Módulos visuales</h3><div class="header-actions"><button data-add-grid="${index}" class="toc-toggle" type="button">+ Cuadrícula</button><button data-add-pin="${index}" class="toc-toggle" type="button">+ Pin map</button><button data-add-decision="${index}" class="toc-toggle" type="button">+ Decision tree</button><button data-add-timeline="${index}" class="toc-toggle" type="button">+ Timeline</button></div></div><div data-modules="${index}">${renderGridEditors(section, index)}${renderPinEditors(section, index)}${renderDecisionEditors(section, index)}${renderTimelineEditors(section, index)}</div></div>
     </article>`).join("");
   sectionsEditor.querySelectorAll("[data-section]").forEach((element, index) => {
     element.querySelectorAll("[data-section-field]").forEach((field) => field.addEventListener("input", () => updateSection(index, element)));
@@ -47,9 +47,11 @@ function renderEditor() {
   sectionsEditor.querySelectorAll("[data-add-grid]").forEach((button) => button.addEventListener("click", () => addGridModule(Number(button.dataset.addGrid))));
   sectionsEditor.querySelectorAll("[data-add-pin]").forEach((button) => button.addEventListener("click", () => addPinModule(Number(button.dataset.addPin))));
   sectionsEditor.querySelectorAll("[data-add-decision]").forEach((button) => button.addEventListener("click", () => addDecisionModule(Number(button.dataset.addDecision))));
+  sectionsEditor.querySelectorAll("[data-add-timeline]").forEach((button) => button.addEventListener("click", () => addTimelineModule(Number(button.dataset.addTimeline))));
   bindGridEditors();
   bindPinEditors();
   bindDecisionEditors();
+  bindTimelineEditors();
   editor.hidden = false;
   renderCollections();
   renderQuickIndex();
@@ -58,7 +60,7 @@ function renderEditor() {
 
 function renderGridEditors(section, sectionIndex) {
   return (section.modules || []).map((module, moduleIndex) => {
-    if (module.type !== "grid_map") return ["pin_map", "decision_tree"].includes(module.type) ? "" : `<p class="section-intro">Módulo ${escapeHtml(module.type)}: se conserva sin edición visual.</p>`;
+    if (module.type !== "grid_map") return ["pin_map", "decision_tree", "timeline_route"].includes(module.type) ? "" : `<p class="section-intro">Módulo ${escapeHtml(module.type)}: se conserva sin edición visual.</p>`;
     const cells = Array.from({ length: module.width * module.height }, (_, cellIndex) => {
       const x = cellIndex % module.width;
       const y = Math.floor(cellIndex / module.width);
@@ -170,6 +172,48 @@ function addDecisionModule(sectionIndex) {
     id: moduleId,
     title: "Nueva decisión",
     nodes: [{ id: `${moduleId}-inicio`, title: "Inicio", text: "Describe la primera decisión.", next: [] }]
+  });
+  renderEditor();
+  renderValidation();
+}
+
+function renderTimelineEditors(section, sectionIndex) {
+  return (section.modules || []).map((module, moduleIndex) => {
+    if (module.type !== "timeline_route") return "";
+    return `<div class="grid-editor timeline-editor"><div class="form-grid"><label>ID<input data-timeline-field="id" data-timeline="${sectionIndex}:${moduleIndex}" value="${escapeHtml(module.id || "")}"></label><label>Título<input data-timeline-field="title" data-timeline="${sectionIndex}:${moduleIndex}" value="${escapeHtml(module.title || "")}"></label></div><label>Pasos (id | título | texto | tipo)<textarea data-timeline-field="steps" data-timeline="${sectionIndex}:${moduleIndex}" rows="6">${escapeHtml((module.steps || []).map((step) => `${step.id || ""} | ${step.title || ""} | ${step.text || ""} | ${step.kind || ""}`).join("\n"))}</textarea></label></div>`;
+  }).join("");
+}
+
+function bindTimelineEditors() {
+  sectionsEditor.querySelectorAll("[data-timeline-field]").forEach((field) => field.addEventListener("input", () => {
+    const [sectionIndex, moduleIndex] = field.dataset.timeline.split(":").map(Number);
+    const module = guide.sections[sectionIndex].modules[moduleIndex];
+    const key = field.dataset.timelineField;
+    if (key === "steps") {
+      module.steps = field.value.split("\n").filter(Boolean).map((line, index) => {
+        const [id, title, text = "", kind = ""] = line.split("|");
+        return {
+          id: slug(id) || `${module.id}-paso-${index + 1}`,
+          title: title?.trim() || `Paso ${index + 1}`,
+          text: text.trim(),
+          ...(kind.trim() ? { kind: kind.trim() } : {})
+        };
+      });
+    } else module[key] = key === "id" ? slug(field.value) : field.value;
+    status.textContent = "Cambios pendientes de exportar.";
+    renderValidation();
+  }));
+}
+
+function addTimelineModule(sectionIndex) {
+  const section = guide.sections[sectionIndex];
+  section.modules ||= [];
+  const moduleId = `${section.id}-timeline-${section.modules.length + 1}`;
+  section.modules.push({
+    type: "timeline_route",
+    id: moduleId,
+    title: "Nueva ruta",
+    steps: [{ id: `${moduleId}-inicio`, title: "Inicio", text: "Describe el primer paso." }]
   });
   renderEditor();
   renderValidation();

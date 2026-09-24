@@ -98,3 +98,7 @@ cualquier género y evita acoplarlo a un juego concreto.
 El editor de `decision_tree` permite definir nodos y sus conexiones con el
 formato `id | título | texto | siguiente, nodo`. Las referencias inexistentes
 se consideran errores y bloquean la exportación.
+
+El editor de `timeline_route` permite definir rutas ordenadas con el formato
+`id | título | texto | tipo`. El orden de las líneas determina el orden de
+presentación en el Viewer.

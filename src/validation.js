@@ -62,6 +62,16 @@ export function validateGuide(guide) {
             if (!nodeIds.has(target)) errors.push(`modules.${module.id}.nodes.${node.id}: referencia inexistente "${target}".`);
           }
         }
+        if (module.type === "timeline_route") {
+          const stepIds = new Set();
+          for (const [stepIndex, step] of (module.steps || []).entries()) {
+            if (!step.id) errors.push(`modules.${module.id}.steps[${stepIndex}]: falta id.`);
+            else if (stepIds.has(step.id)) errors.push(`modules.${module.id}.steps[${stepIndex}]: id duplicado "${step.id}".`);
+            else stepIds.add(step.id);
+            if (!step.title?.trim()) warnings.push(`modules.${module.id}.steps[${stepIndex}].title: falta título.`);
+            addId(step.id, `sections[${sectionIndex}].modules[${moduleIndex}].steps[${stepIndex}]`);
+          }
+        }
       }
     }
   }
