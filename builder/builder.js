@@ -39,15 +39,17 @@ function renderEditor() {
     <article class="builder-section" data-section="${index}">
       <div class="form-grid"><label>ID<input data-section-field="id" value="${escapeHtml(section.id || "")}"></label><label>Título<input data-section-field="title" value="${escapeHtml(section.title || "")}"></label><label class="full-width">Introducción<textarea data-section-field="intro" rows="2">${escapeHtml(section.intro || "")}</textarea></label></div>
       <label>Pasos (uno por línea; formato: título | contenido)<textarea data-section-field="steps" rows="4">${escapeHtml((section.steps || []).map((step) => `${step.title} | ${step.body}`).join("\n"))}</textarea></label>
-      <div class="module-editor"><div class="section-heading"><h3>Mapas visuales</h3><div class="header-actions"><button data-add-grid="${index}" class="toc-toggle" type="button">+ Cuadrícula</button><button data-add-pin="${index}" class="toc-toggle" type="button">+ Pin map</button></div></div><div data-modules="${index}">${renderGridEditors(section, index)}${renderPinEditors(section, index)}</div></div>
+      <div class="module-editor"><div class="section-heading"><h3>Módulos visuales</h3><div class="header-actions"><button data-add-grid="${index}" class="toc-toggle" type="button">+ Cuadrícula</button><button data-add-pin="${index}" class="toc-toggle" type="button">+ Pin map</button><button data-add-decision="${index}" class="toc-toggle" type="button">+ Decision tree</button></div></div><div data-modules="${index}">${renderGridEditors(section, index)}${renderPinEditors(section, index)}${renderDecisionEditors(section, index)}</div></div>
     </article>`).join("");
   sectionsEditor.querySelectorAll("[data-section]").forEach((element, index) => {
     element.querySelectorAll("[data-section-field]").forEach((field) => field.addEventListener("input", () => updateSection(index, element)));
   });
   sectionsEditor.querySelectorAll("[data-add-grid]").forEach((button) => button.addEventListener("click", () => addGridModule(Number(button.dataset.addGrid))));
   sectionsEditor.querySelectorAll("[data-add-pin]").forEach((button) => button.addEventListener("click", () => addPinModule(Number(button.dataset.addPin))));
+  sectionsEditor.querySelectorAll("[data-add-decision]").forEach((button) => button.addEventListener("click", () => addDecisionModule(Number(button.dataset.addDecision))));
   bindGridEditors();
   bindPinEditors();
+  bindDecisionEditors();
   editor.hidden = false;
   renderCollections();
   renderQuickIndex();
@@ -56,7 +58,7 @@ function renderEditor() {
 
 function renderGridEditors(section, sectionIndex) {
   return (section.modules || []).map((module, moduleIndex) => {
-    if (module.type !== "grid_map") return `<p class="section-intro">Módulo ${escapeHtml(module.type)}: se conserva sin edición visual.</p>`;
+    if (module.type !== "grid_map") return ["pin_map", "decision_tree"].includes(module.type) ? "" : `<p class="section-intro">Módulo ${escapeHtml(module.type)}: se conserva sin edición visual.</p>`;
     const cells = Array.from({ length: module.width * module.height }, (_, cellIndex) => {
       const x = cellIndex % module.width;
       const y = Math.floor(cellIndex / module.width);
@@ -126,6 +128,49 @@ function addPinModule(sectionIndex) {
   const section = guide.sections[sectionIndex];
   section.modules ||= [];
   section.modules.push({ type: "pin_map", id: `${section.id}-pin-map-${section.modules.length + 1}`, title: "Nuevo pin map", image: "", alt: "", pins: [] });
+  renderEditor();
+  renderValidation();
+}
+
+function renderDecisionEditors(section, sectionIndex) {
+  return (section.modules || []).map((module, moduleIndex) => {
+    if (module.type !== "decision_tree") return "";
+    const nodes = module.nodes || [];
+    return `<div class="grid-editor decision-editor"><div class="form-grid"><label>ID<input data-decision-field="id" data-decision="${sectionIndex}:${moduleIndex}" value="${escapeHtml(module.id || "")}"></label><label>Título<input data-decision-field="title" data-decision="${sectionIndex}:${moduleIndex}" value="${escapeHtml(module.title || "")}"></label></div><label>Nodos (id | título | texto | siguientes separados por coma)<textarea data-decision-field="nodes" data-decision="${sectionIndex}:${moduleIndex}" rows="6">${escapeHtml(nodes.map((node) => `${node.id || ""} | ${node.title || ""} | ${node.text || ""} | ${(node.next || []).join(", ")}`).join("\n"))}</textarea></label></div>`;
+  }).join("");
+}
+
+function bindDecisionEditors() {
+  sectionsEditor.querySelectorAll("[data-decision-field]").forEach((field) => field.addEventListener("input", () => {
+    const [sectionIndex, moduleIndex] = field.dataset.decision.split(":").map(Number);
+    const module = guide.sections[sectionIndex].modules[moduleIndex];
+    const key = field.dataset.decisionField;
+    if (key === "nodes") {
+      module.nodes = field.value.split("\n").filter(Boolean).map((line, index) => {
+        const [id, title, text = "", next = ""] = line.split("|");
+        return {
+          id: slug(id) || `${module.id}-nodo-${index + 1}`,
+          title: title?.trim() || `Nodo ${index + 1}`,
+          text: text.trim(),
+          next: next.split(",").map((item) => slug(item)).filter(Boolean)
+        };
+      });
+    } else module[key] = key === "id" ? slug(field.value) : field.value;
+    status.textContent = "Cambios pendientes de exportar.";
+    renderValidation();
+  }));
+}
+
+function addDecisionModule(sectionIndex) {
+  const section = guide.sections[sectionIndex];
+  section.modules ||= [];
+  const moduleId = `${section.id}-decision-${section.modules.length + 1}`;
+  section.modules.push({
+    type: "decision_tree",
+    id: moduleId,
+    title: "Nueva decisión",
+    nodes: [{ id: `${moduleId}-inicio`, title: "Inicio", text: "Describe la primera decisión.", next: [] }]
+  });
   renderEditor();
   renderValidation();
 }

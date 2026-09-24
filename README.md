@@ -94,3 +94,7 @@ La validación también impide exportar marcadores fuera de los límites declara
 El editor de `pin_map` permite definir una imagen base y marcadores mediante
 coordenadas porcentuales (`0-100`). Esto mantiene el módulo reutilizable para
 cualquier género y evita acoplarlo a un juego concreto.
+
+El editor de `decision_tree` permite definir nodos y sus conexiones con el
+formato `id | título | texto | siguiente, nodo`. Las referencias inexistentes
+se consideran errores y bloquean la exportación.

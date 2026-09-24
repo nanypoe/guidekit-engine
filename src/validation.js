@@ -48,6 +48,21 @@ export function validateGuide(guide) {
           }
         }
       }
+      if (module.type === "decision_tree") {
+        const nodeIds = new Set();
+        for (const [nodeIndex, node] of (module.nodes || []).entries()) {
+          if (!node.id) errors.push(`modules.${module.id}.nodes[${nodeIndex}]: falta id.`);
+          else if (nodeIds.has(node.id)) errors.push(`modules.${module.id}.nodes[${nodeIndex}]: id duplicado "${node.id}".`);
+          else nodeIds.add(node.id);
+          if (!node.title?.trim()) warnings.push(`modules.${module.id}.nodes[${nodeIndex}].title: falta título.`);
+          addId(node.id, `sections[${sectionIndex}].modules[${moduleIndex}].nodes[${nodeIndex}]`);
+        }
+        for (const node of module.nodes || []) {
+          for (const target of node.next || []) {
+            if (!nodeIds.has(target)) errors.push(`modules.${module.id}.nodes.${node.id}: referencia inexistente "${target}".`);
+          }
+        }
+      }
     }
   }
   for (const [collectionIndex, collection] of (guide.datasets?.collections || []).entries()) {
