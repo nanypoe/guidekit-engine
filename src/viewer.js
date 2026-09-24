@@ -18,11 +18,25 @@ function renderImages(images = [], position) {
     <figure class="guide-image"><img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy">${image.caption ? `<figcaption>${escapeHtml(image.caption)}</figcaption>` : ""}</figure>`).join("");
 }
 
+function renderSources(sources = []) {
+  if (!sources.length) return "";
+  return `<section class="sources-panel"><p class="eyebrow">PROCEDENCIA</p><h2>Fuentes y atribuciones</h2><ul>${sources.map((source) => {
+    let link = "";
+    try {
+      const url = new URL(source.url);
+      if (["http:", "https:"].includes(url.protocol)) link = ` <a href="${escapeHtml(url.href)}" target="_blank" rel="noreferrer">${escapeHtml(url.href)}</a>`;
+    } catch {
+      link = "";
+    }
+    return `<li><b>${escapeHtml(source.title)}</b><span>${escapeHtml(source.license)}${link}${source.attribution ? ` — ${escapeHtml(source.attribution)}` : ""}</span></li>`;
+  }).join("")}</ul></section>`;
+}
+
 function render() {
   const progress = JSON.parse(localStorage.getItem(progressKey(guide.id)) || "{}");
   app.innerHTML = `<section class="guide-intro"><a class="back-link" href="./">← Catálogo</a><p class="eyebrow">${escapeHtml(guide.franchise || guide.genres.join(" · "))}</p><h1>${escapeHtml(guide.title)}</h1><p>${escapeHtml(guide.summary || "")}</p><div class="tag-row">${guide.systems.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div></section>
     <nav class="quick-index" aria-label="Índice rápido">${(guide.quickIndex || []).map((item) => `<a class="quick-card tone-${escapeHtml(item.tone || "cyan")}" href="#${escapeHtml(item.target)}"><span>${escapeHtml(item.label)}</span><b>→</b></a>`).join("")}</nav>
-    <div class="guide-content">${guide.sections.map((section) => `<section class="guide-section" id="${escapeHtml(section.id)}"><h2>${escapeHtml(section.title)}</h2>${section.intro ? `<p class="section-intro">${escapeHtml(section.intro)}</p>` : ""}${(section.steps || []).map((step) => `<article class="step-card" id="${escapeHtml(step.id)}">${step.checkable ? `<label class="check-row"><input type="checkbox" data-step="${escapeHtml(step.id)}" ${progress[step.id] ? "checked" : ""}><span>Completado</span></label>` : ""}${renderImages(step.images, "before")}<h3>${escapeHtml(step.title)}</h3><p>${inlineMarkdown(step.body, guide.keywords || [])}</p>${renderImages(step.images, "after")}${step.callout ? `<aside class="callout callout-${escapeHtml(step.callout.type)}"><b>${escapeHtml(step.callout.label)}</b><span>${inlineMarkdown(step.callout.text, guide.keywords || [])}</span></aside>` : ""}</article>`).join("")}${(section.modules || []).map(renderModule).join("")}</section>`).join("")}${renderDatasets(guide.datasets)}</div>`;
+    <div class="guide-content">${guide.sections.map((section) => `<section class="guide-section" id="${escapeHtml(section.id)}"><h2>${escapeHtml(section.title)}</h2>${section.intro ? `<p class="section-intro">${escapeHtml(section.intro)}</p>` : ""}${(section.steps || []).map((step) => `<article class="step-card" id="${escapeHtml(step.id)}">${step.checkable ? `<label class="check-row"><input type="checkbox" data-step="${escapeHtml(step.id)}" ${progress[step.id] ? "checked" : ""}><span>Completado</span></label>` : ""}${renderImages(step.images, "before")}<h3>${escapeHtml(step.title)}</h3><p>${inlineMarkdown(step.body, guide.keywords || [])}</p>${renderImages(step.images, "after")}${step.callout ? `<aside class="callout callout-${escapeHtml(step.callout.type)}"><b>${escapeHtml(step.callout.label)}</b><span>${inlineMarkdown(step.callout.text, guide.keywords || [])}</span></aside>` : ""}</article>`).join("")}${(section.modules || []).map(renderModule).join("")}</section>`).join("")}${renderDatasets(guide.datasets)}${renderSources(guide.sources)}</div>`;
   drawer.innerHTML = `<div class="drawer-heading"><p class="eyebrow">NAVEGACIÓN</p><h2>${escapeHtml(guide.title)}</h2></div>${tocItems(guide.tableOfContents || [])}`;
   app.querySelectorAll("[data-step]").forEach((input) => input.addEventListener("change", () => {
     const next = JSON.parse(localStorage.getItem(progressKey(guide.id)) || "{}");

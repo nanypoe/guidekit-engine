@@ -10,6 +10,7 @@ const sectionsEditor = document.querySelector("#sections-editor");
 const collectionsEditor = document.querySelector("#collections-editor");
 const quickIndexEditor = document.querySelector("#quick-index-editor");
 const validationPanel = document.querySelector("#validation-panel");
+const sourcesEditor = document.querySelector("#sources-editor");
 
 const csv = (value) => String(value || "").split(",").map((item) => item.trim()).filter(Boolean);
 const slug = (value) => String(value || "").toLowerCase().trim().replace(/[^a-z0-9áéíóúñ]+/gi, "-").replace(/(^-|-$)/g, "");
@@ -39,7 +40,7 @@ function renderEditor() {
     <article class="builder-section" data-section="${index}">
       <div class="form-grid"><label>ID<input data-section-field="id" value="${escapeHtml(section.id || "")}"></label><label>Título<input data-section-field="title" value="${escapeHtml(section.title || "")}"></label><label class="full-width">Introducción<textarea data-section-field="intro" rows="2">${escapeHtml(section.intro || "")}</textarea></label></div>
       <label>Pasos (uno por línea; formato: título | contenido)<textarea data-section-field="steps" rows="4">${escapeHtml((section.steps || []).map((step) => `${step.title} | ${step.body}`).join("\n"))}</textarea></label>
-      <div class="module-editor"><div class="section-heading"><h3>Módulos visuales</h3><div class="header-actions"><button data-add-grid="${index}" class="toc-toggle" type="button">+ Cuadrícula</button><button data-add-pin="${index}" class="toc-toggle" type="button">+ Pin map</button><button data-add-decision="${index}" class="toc-toggle" type="button">+ Decision tree</button><button data-add-timeline="${index}" class="toc-toggle" type="button">+ Timeline</button></div></div><div data-modules="${index}">${renderGridEditors(section, index)}${renderPinEditors(section, index)}${renderDecisionEditors(section, index)}${renderTimelineEditors(section, index)}</div></div>
+      <div class="module-editor"><div class="section-heading"><h3>Módulos visuales</h3><div class="header-actions"><button data-add-grid="${index}" class="toc-toggle" type="button">+ Cuadrícula</button><button data-add-pin="${index}" class="toc-toggle" type="button">+ Pin map</button><button data-add-decision="${index}" class="toc-toggle" type="button">+ Decision tree</button><button data-add-timeline="${index}" class="toc-toggle" type="button">+ Timeline</button><button data-add-tool="${index}" class="toc-toggle" type="button">+ Herramienta</button></div></div><div data-modules="${index}">${renderGridEditors(section, index)}${renderPinEditors(section, index)}${renderDecisionEditors(section, index)}${renderTimelineEditors(section, index)}${renderToolEditors(section, index)}</div></div>
     </article>`).join("");
   sectionsEditor.querySelectorAll("[data-section]").forEach((element, index) => {
     element.querySelectorAll("[data-section-field]").forEach((field) => field.addEventListener("input", () => updateSection(index, element)));
@@ -48,11 +49,14 @@ function renderEditor() {
   sectionsEditor.querySelectorAll("[data-add-pin]").forEach((button) => button.addEventListener("click", () => addPinModule(Number(button.dataset.addPin))));
   sectionsEditor.querySelectorAll("[data-add-decision]").forEach((button) => button.addEventListener("click", () => addDecisionModule(Number(button.dataset.addDecision))));
   sectionsEditor.querySelectorAll("[data-add-timeline]").forEach((button) => button.addEventListener("click", () => addTimelineModule(Number(button.dataset.addTimeline))));
+  sectionsEditor.querySelectorAll("[data-add-tool]").forEach((button) => button.addEventListener("click", () => addToolModule(Number(button.dataset.addTool))));
   bindGridEditors();
   bindPinEditors();
   bindDecisionEditors();
   bindTimelineEditors();
+  bindToolEditors();
   editor.hidden = false;
+  if (sourcesEditor) sourcesEditor.value = (guide.sources || []).map((source) => [source.id, source.title, source.license, source.url || "", source.attribution || ""].join(" | ")).join("\n");
   renderCollections();
   renderQuickIndex();
   download.disabled = false;
@@ -60,7 +64,7 @@ function renderEditor() {
 
 function renderGridEditors(section, sectionIndex) {
   return (section.modules || []).map((module, moduleIndex) => {
-    if (module.type !== "grid_map") return ["pin_map", "decision_tree", "timeline_route"].includes(module.type) ? "" : `<p class="section-intro">Módulo ${escapeHtml(module.type)}: se conserva sin edición visual.</p>`;
+    if (module.type !== "grid_map") return ["pin_map", "decision_tree", "timeline_route", "interactive_tool"].includes(module.type) ? "" : `<p class="section-intro">Módulo ${escapeHtml(module.type)}: se conserva sin edición visual.</p>`;
     const cells = Array.from({ length: module.width * module.height }, (_, cellIndex) => {
       const x = cellIndex % module.width;
       const y = Math.floor(cellIndex / module.width);
@@ -219,6 +223,48 @@ function addTimelineModule(sectionIndex) {
   renderValidation();
 }
 
+function renderToolEditors(section, sectionIndex) {
+  return (section.modules || []).map((module, moduleIndex) => {
+    if (module.type !== "interactive_tool") return "";
+    return `<div class="grid-editor tool-editor"><div class="form-grid"><label>ID<input data-tool-field="id" data-tool="${sectionIndex}:${moduleIndex}" value="${escapeHtml(module.id || "")}"></label><label>Título<input data-tool-field="title" data-tool="${sectionIndex}:${moduleIndex}" value="${escapeHtml(module.title || "")}"></label><label class="full-width">Descripción<textarea data-tool-field="description" data-tool="${sectionIndex}:${moduleIndex}" rows="3">${escapeHtml(module.description || "")}</textarea></label></div><label>Opciones (id | etiqueta | descripción)<textarea data-tool-field="options" data-tool="${sectionIndex}:${moduleIndex}" rows="5">${escapeHtml((module.options || []).map((option) => `${option.id || ""} | ${option.label || ""} | ${option.description || ""}`).join("\n"))}</textarea></label></div>`;
+  }).join("");
+}
+
+function bindToolEditors() {
+  sectionsEditor.querySelectorAll("[data-tool-field]").forEach((field) => field.addEventListener("input", () => {
+    const [sectionIndex, moduleIndex] = field.dataset.tool.split(":").map(Number);
+    const module = guide.sections[sectionIndex].modules[moduleIndex];
+    const key = field.dataset.toolField;
+    if (key === "options") {
+      module.options = field.value.split("\n").filter(Boolean).map((line, index) => {
+        const [id, label, description = ""] = line.split("|");
+        return {
+          id: slug(id) || `${module.id}-opcion-${index + 1}`,
+          label: label?.trim() || `Opción ${index + 1}`,
+          description: description.trim()
+        };
+      });
+    } else module[key] = key === "id" ? slug(field.value) : field.value;
+    status.textContent = "Cambios pendientes de exportar.";
+    renderValidation();
+  }));
+}
+
+function addToolModule(sectionIndex) {
+  const section = guide.sections[sectionIndex];
+  section.modules ||= [];
+  const moduleId = `${section.id}-tool-${section.modules.length + 1}`;
+  section.modules.push({
+    type: "interactive_tool",
+    id: moduleId,
+    title: "Nueva herramienta",
+    description: "Describe el propósito de esta herramienta.",
+    options: []
+  });
+  renderEditor();
+  renderValidation();
+}
+
 function ensureDatasets() {
   guide.datasets ||= {};
   guide.datasets.collections ||= [];
@@ -305,6 +351,21 @@ document.querySelector("#add-collection").addEventListener("click", () => {
 });
 
 quickIndexEditor.addEventListener("input", updateQuickIndex);
+
+if (sourcesEditor) sourcesEditor.addEventListener("input", () => {
+  guide.sources = sourcesEditor.value.split("\n").filter(Boolean).map((line, index) => {
+    const [id, title, license, url = "", attribution = ""] = line.split("|");
+    return {
+      id: slug(id) || `fuente-${index + 1}`,
+      title: title?.trim() || "",
+      license: license?.trim() || "",
+      ...(url.trim() ? { url: url.trim() } : {}),
+      ...(attribution.trim() ? { attribution: attribution.trim() } : {})
+    };
+  });
+  status.textContent = "Cambios pendientes de exportar.";
+  renderValidation();
+});
 
 download.addEventListener("click", () => {
   if (!guide || !renderValidation().valid) return;

@@ -1,4 +1,4 @@
-const CACHE_NAME = "guidekit-shell-v7";
+const CACHE_NAME = "guidekit-shell-v9";
 const SHELL = [
   "./",
   "./index.html",
@@ -16,7 +16,9 @@ const SHELL = [
   "./src/modules/manifest.json",
   "./src/components/index.js",
   "./src/components/manifest.json",
-  "./src/app-manifest.json"
+  "./src/app-manifest.json",
+  "./guides/catalog.json",
+  "./guides/smt-strange-journey.json"
 ];
 
 self.addEventListener("install", (event) => {

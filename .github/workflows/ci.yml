@@ -1,0 +1,40 @@
+name: GuideKit CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate JSON documents
+        run: |
+          node -e "for (const file of ['guides/smt-strange-journey.json', 'guides/catalog.json', 'schema/guide.schema.json']) JSON.parse(require('fs').readFileSync(file)); console.log('JSON validation passed')"
+      - name: Check JavaScript syntax
+        run: |
+          node --check builder/builder.js
+          node --check src/data.js
+          node --check src/hub.js
+          node --check src/modules/index.js
+          node --check src/components/index.js
+          node --check src/ui.js
+          node --check src/validation.js
+          node --check src/viewer.js
+          node --check tools/test-validation.mjs
+          node --check tools/validate-guide.mjs
+      - name: Validate pilot guide
+        run: node tools/validate-guide.mjs guides/smt-strange-journey.json
+      - name: Run validation regression tests
+        run: node tools/test-validation.mjs

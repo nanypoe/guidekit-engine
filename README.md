@@ -65,7 +65,16 @@ Para inspeccionar la guía fuente antes de migrarla:
 node tools/analyze-smt.mjs
 node tools/extract-walkthrough.mjs > /tmp/smt-walkthrough-draft.json
 node tools/validate-guide.mjs guides/smt-strange-journey.json
+node tools/test-validation.mjs
 ```
+
+Estas comprobaciones también se ejecutan automáticamente mediante GitHub
+Actions en cada push a `main` y en cada pull request.
+
+El Service Worker precarga el catálogo y la guía piloto junto con la shell de
+la aplicación. Así, una guía publicada puede seguir abriéndose sin conexión
+después de la primera visita; cada nueva guía debe añadirse al listado de
+recursos precargados cuando requiera disponibilidad offline inmediata.
 
 El extractor conserva anclas y líneas de origen, pero no publica automáticamente
 el texto: cada sección debe revisarse, traducirse y normalizarse antes de entrar
@@ -76,6 +85,12 @@ el texto visible de cada fila o entidad, por lo que funciona igual para
 enemigos, cartas, pistas, rutas, habilidades o coleccionables. El builder podrá
 reutilizar el mismo componente para explorar y editar datos sin mezclar el flujo
 de autoría con el de lectura.
+
+Las guías pueden declarar `sources` con identificador, título, licencia, URL y
+atribución. Las fuentes son obligatorias para documentar material externo antes
+de publicar una guía; el Builder y la validación compartida comprueban que cada
+entrada tenga título y licencia. El Viewer muestra estas fuentes al final de la
+guía y solo convierte URLs HTTP/HTTPS en enlaces.
 
 El Builder no permite descargar una guía con errores estructurales. La validación
 se ejecuta mientras se edita y marca IDs duplicados, referencias rotas, módulos
@@ -102,3 +117,7 @@ se consideran errores y bloquean la exportación.
 El editor de `timeline_route` permite definir rutas ordenadas con el formato
 `id | título | texto | tipo`. El orden de las líneas determina el orden de
 presentación en el Viewer.
+
+El editor de `interactive_tool` permite definir una herramienta reutilizable
+con descripción y opciones mediante `id | etiqueta | descripción`, sin imponer
+una mecánica específica de un juego.

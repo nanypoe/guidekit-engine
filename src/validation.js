@@ -22,6 +22,22 @@ export function validateGuide(guide) {
   if (!Array.isArray(guide.systems) || !guide.systems.length) errors.push("guide.systems: debe contener al menos un sistema.");
   if (!Array.isArray(guide.genres) || !guide.genres.length) errors.push("guide.genres: debe contener al menos un género.");
   if (guide.language && guide.language !== "es") warnings.push("guide.language: la aplicación está preparada para contenido en español.");
+  const sourceIds = new Set();
+  for (const [sourceIndex, source] of (guide.sources || []).entries()) {
+    if (!source.id) errors.push(`sources[${sourceIndex}]: falta id.`);
+    else if (sourceIds.has(source.id)) errors.push(`sources[${sourceIndex}]: id duplicado "${source.id}".`);
+    else sourceIds.add(source.id);
+    if (!source.title?.trim()) errors.push(`sources[${sourceIndex}].title: es obligatorio.`);
+    if (!source.license?.trim()) errors.push(`sources[${sourceIndex}].license: es obligatorio.`);
+    if (source.url) {
+      try {
+        const protocol = new URL(source.url).protocol;
+        if (!["http:", "https:"].includes(protocol)) errors.push(`sources[${sourceIndex}].url: solo se permiten URLs HTTP o HTTPS.`);
+      } catch {
+        errors.push(`sources[${sourceIndex}].url: URL inválida.`);
+      }
+    }
+  }
 
   for (const [sectionIndex, section] of (guide.sections || []).entries()) {
     addId(section.id, `sections[${sectionIndex}]`);
@@ -62,15 +78,26 @@ export function validateGuide(guide) {
             if (!nodeIds.has(target)) errors.push(`modules.${module.id}.nodes.${node.id}: referencia inexistente "${target}".`);
           }
         }
-        if (module.type === "timeline_route") {
-          const stepIds = new Set();
-          for (const [stepIndex, step] of (module.steps || []).entries()) {
-            if (!step.id) errors.push(`modules.${module.id}.steps[${stepIndex}]: falta id.`);
-            else if (stepIds.has(step.id)) errors.push(`modules.${module.id}.steps[${stepIndex}]: id duplicado "${step.id}".`);
-            else stepIds.add(step.id);
-            if (!step.title?.trim()) warnings.push(`modules.${module.id}.steps[${stepIndex}].title: falta título.`);
-            addId(step.id, `sections[${sectionIndex}].modules[${moduleIndex}].steps[${stepIndex}]`);
-          }
+      }
+      if (module.type === "timeline_route") {
+        const stepIds = new Set();
+        for (const [stepIndex, step] of (module.steps || []).entries()) {
+          if (!step.id) errors.push(`modules.${module.id}.steps[${stepIndex}]: falta id.`);
+          else if (stepIds.has(step.id)) errors.push(`modules.${module.id}.steps[${stepIndex}]: id duplicado "${step.id}".`);
+          else stepIds.add(step.id);
+          if (!step.title?.trim()) warnings.push(`modules.${module.id}.steps[${stepIndex}].title: falta título.`);
+          addId(step.id, `sections[${sectionIndex}].modules[${moduleIndex}].steps[${stepIndex}]`);
+        }
+      }
+      if (module.type === "interactive_tool") {
+        if (!module.description?.trim()) warnings.push(`modules.${module.id}: interactive_tool no tiene descripción.`);
+        const optionIds = new Set();
+        for (const [optionIndex, option] of (module.options || []).entries()) {
+          if (!option.id) errors.push(`modules.${module.id}.options[${optionIndex}]: falta id.`);
+          else if (optionIds.has(option.id)) errors.push(`modules.${module.id}.options[${optionIndex}]: id duplicado "${option.id}".`);
+          else optionIds.add(option.id);
+          if (!option.label?.trim()) warnings.push(`modules.${module.id}.options[${optionIndex}].label: falta etiqueta.`);
+          addId(option.id, `sections[${sectionIndex}].modules[${moduleIndex}].options[${optionIndex}]`);
         }
       }
     }

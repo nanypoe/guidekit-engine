@@ -24,7 +24,8 @@ function renderDecisionTree(module) {
 }
 
 function renderInteractiveTool(module) {
-  return `<div class="module-card"><p class="eyebrow">HERRAMIENTA</p><h3>${escapeHtml(module.title)}</h3><p>${escapeHtml(module.description || "")}</p></div>`;
+  const options = (module.options || []).map((option) => `<li><b>${escapeHtml(option.label)}</b><span>${escapeHtml(option.description || "")}</span></li>`).join("");
+  return `<div class="module-card"><p class="eyebrow">HERRAMIENTA</p><h3>${escapeHtml(module.title)}</h3><p>${escapeHtml(module.description || "")}</p>${options ? `<ul class="tool-options">${options}</ul>` : ""}</div>`;
 }
 
 const renderers = {
